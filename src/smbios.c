@@ -153,19 +153,16 @@ EditString(
     // If new string is shorter than original, we can't fit it without resizing
     // But we can pad with spaces or truncate the original
     if (bstrLength < astrLength) {
-        // New string is shorter - pad with spaces to match original length
+        // New string is shorter - pad with spaces to preserve the original
+        // strings-section terminator at astr[astrLength] (original '\0').
         UINTN i;
         for (i = 0; i < bstrLength && i < 255; i++) {
             astr[i] = buffer[i];
         }
-        // Pad rest with spaces (if original had spaces) or nulls
-        for (; i < astrLength - 1 && i < 255; i++) {
-            astr[i] = ' '; // Pad with space
+        for (; i < astrLength && i < 255; i++) {
+            astr[i] = ' ';
         }
-        // Ensure null terminator
-        if (astrLength > 1) {
-            astr[astrLength - 1] = 0;
-        }
+        // astr[astrLength] already holds the original NUL; leave it.
         return;
     }
 
