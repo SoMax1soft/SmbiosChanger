@@ -16,7 +16,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential uuid-dev iasl git nasm python3 python3-distutils-extra
+          sudo apt-get install -y build-essential uuid-dev iasl git nasm python3 python-is-python3
 
       - name: Checkout EDK2
         uses: actions/checkout@v4
@@ -25,6 +25,12 @@ jobs:
           ref: edk2-stable202611
           submodules: false
           path: edk2
+
+      - name: Init only the submodules BaseTools needs
+        working-directory: edk2
+        run: |
+          git submodule update --init --depth 1 BaseTools/Source/C/BrotliCompress/brotli
+          git submodule update --init --depth 1 MdeModulePkg/Library/BrotliCustomDecompressLib/brotli || true
 
       - name: Build EDK2 BaseTools
         working-directory: edk2
