@@ -36,3 +36,4 @@
 [Protocols]
   gEfiSmbiosProtocolGuid
   gEfiSimpleFileSystemProtocolGuid
+  gEfiRngProtocolGuid

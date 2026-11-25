@@ -130,7 +130,35 @@ PatchType0(
     IN SMBIOS_STRUCTURE_TABLE* entry
 )
 {
+#if defined(SPOOF_BIOS_SERIAL) && SPOOF_BIOS_SERIAL
+    if (entry == NULL) {
+        PrintLog(L"[FAIL] Entry is NULL\n");
+        return;
+    }
+
+    SMBIOS_STRUCTURE_POINTER_CUSTOM table =
+        FindTableByType(entry, SMBIOS_TYPE_BIOS_INFORMATION, 0);
+
+    if (!table.Raw || !table.Type0) {
+        PrintLog(L"[WARN] Type 0 (BIOS) table not found\n");
+        return;
+    }
+
+    PrintLog(L"[WORK] Patching Type 0 (BIOS) at 0x%016lx...\n",
+             (UINT64)(UINTN)table.Raw);
+
+    if (table.Type0->BiosVersion != 0) {
+        if (g_BiosSerial[0] != 0) {
+            EditCustomString(table, &table.Type0->BiosVersion, g_BiosSerial);
+        } else {
+            EditRandom(table, &table.Type0->BiosVersion);
+        }
+    }
+
+    PrintLog(L"[OK] Type 0 (BIOS) patched successfully\n");
+#else
     (VOID)entry;
+#endif
 }
 
 VOID
@@ -252,6 +280,7 @@ PatchAll(
     }
     
     PrintLog(L"[WORK] Starting patch sequence...\n");
+    PatchType0(entry);
     PatchType1(entry);
     PatchType2(entry);
     PatchType4(entry);
