@@ -39,7 +39,7 @@ jobs:
 
       - name: Stage spoofer inside EDK2
         run: |
-          cp -r SmbiosChanger edk2/SmbiosSpoofer
+          cp -r SmbiosChanger edk2/SmbiosChanger-main
 
       - name: Build SmbiosSpoofer.efi
         working-directory: edk2
@@ -48,7 +48,7 @@ jobs:
           export WORKSPACE=$PWD
           export EDK_TOOLS_PATH=$PWD/BaseTools
           . edksetup.sh BaseTools
-          build -a X64 -b RELEASE -t GCC -p SmbiosSpoofer/SmbiosSpooferV2.dsc
+          build -a X64 -b RELEASE -t GCC -p SmbiosChanger-main/SmbiosSpooferV2.dsc
 
       - name: Collect artifact
         run: |
