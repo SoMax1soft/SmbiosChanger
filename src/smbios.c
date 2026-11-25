@@ -171,19 +171,21 @@ EditString(
         return;
     }
     
-    // I am lazy piece of shit and I am not implementing some string resizing
-    // Copy new string (astrLength - 1 bytes, preserving NULL terminator)
-    // This means we can only copy up to the original string's length
-    UINTN copyLength = (astrLength > 1) ? (astrLength - 1) : 0;
+    // Fill the original slot fully: astr[0..astrLength-1] get overwritten,
+    // astr[astrLength] still holds the original NUL terminator.
+    UINTN copyLength = astrLength;
+    if (copyLength > bstrLength) {
+        copyLength = bstrLength;
+    }
     if (copyLength > 0) {
-        // Copy up to original length, but ensure we don't exceed buffer length
-        if (copyLength > bstrLength) {
-            copyLength = bstrLength;
-        }
         CopyMem(astr, buffer, copyLength);
-        // Ensure null terminator
-        if (copyLength < astrLength - 1) {
-            astr[copyLength] = 0;
+    }
+    if (copyLength < astrLength) {
+        // New string was shorter than the slot: pad the tail with spaces so
+        // the original NUL at astr[astrLength] stays the single terminator.
+        UINTN p;
+        for (p = copyLength; p < astrLength; p++) {
+            astr[p] = ' ';
         }
     }
 }

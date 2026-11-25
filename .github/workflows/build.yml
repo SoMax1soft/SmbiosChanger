@@ -18,19 +18,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential uuid-dev iasl git nasm python3 python-is-python3
 
-      - name: Checkout EDK2
-        uses: actions/checkout@v4
-        with:
-          repository: tianocore/edk2
-          ref: edk2-stable202611
-          submodules: false
-          path: edk2
-
-      - name: Init only the submodules BaseTools needs
-        working-directory: edk2
+      - name: Clone EDK2 and init submodules (skip dead subhook)
         run: |
-          git submodule update --init --depth 1 BaseTools/Source/C/BrotliCompress/brotli
-          git submodule update --init --depth 1 MdeModulePkg/Library/BrotliCustomDecompressLib/brotli || true
+          set -e
+          git clone --depth 1 --branch edk2-stable202611 https://github.com/tianocore/edk2.git
+          cd edk2
+          git config -f .gitmodules --remove-section submodule.UnitTestFrameworkPkg/Library/SubhookLib/subhook || true
+          sed -i '/SubhookLib\/subhook/d' .gitmodules || true
+          git submodule update --init --depth 1 --recursive --jobs 4 || {
+            echo "Recursive init failed; falling back to per-submodule init."
+            for p in $(git config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}'); do
+              case "$p" in
+                *SubhookLib*) echo "Skipping $p"; continue ;;
+              esac
+              git submodule update --init --depth 1 "$p" || echo "Failed $p, continuing"
+            done
+          }
 
       - name: Build EDK2 BaseTools
         working-directory: edk2
