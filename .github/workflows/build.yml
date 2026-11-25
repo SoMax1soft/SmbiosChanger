@@ -48,7 +48,7 @@ jobs:
           export WORKSPACE=$PWD
           export EDK_TOOLS_PATH=$PWD/BaseTools
           . edksetup.sh BaseTools
-          build -a X64 -b RELEASE -t GCC5 -p SmbiosSpoofer/SmbiosSpooferV2.dsc
+          build -a X64 -b RELEASE -t GCC -p SmbiosSpoofer/SmbiosSpooferV2.dsc
 
       - name: Collect artifact
         run: |
