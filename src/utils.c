@@ -10,6 +10,13 @@
 #include <Library/BaseMemoryLib.h>
 #include <Protocol/Rng.h>
 
+// Local copy of EFI_RNG_PROTOCOL_GUID so we don't depend on EDK2 autogen,
+// which can drop the GLOBAL_REMOVE_IF_UNREFERENCED extern under LTO.
+STATIC CONST EFI_GUID mLocalRngProtocolGuid = {
+    0x3152BCA5, 0xEADA, 0x4FAA,
+    { 0xB1, 0x6A, 0x0E, 0x58, 0xB5, 0xBF, 0x7B, 0x2D }
+};
+
 static UINT64  gPrngState   = 0;
 static BOOLEAN gPrngReady   = FALSE;
 
@@ -72,7 +79,7 @@ TryEfiRng (
         return FALSE;
     }
 
-    status = gBS->LocateProtocol(&gEfiRngProtocolGuid, NULL, (VOID**)&rng);
+    status = gBS->LocateProtocol((EFI_GUID*)&mLocalRngProtocolGuid, NULL, (VOID**)&rng);
     if (EFI_ERROR(status) || rng == NULL || rng->GetRNG == NULL) {
         return FALSE;
     }
